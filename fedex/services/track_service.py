@@ -37,28 +37,42 @@ class FedexTrackRequest(FedexBaseService):
         self._config_obj = config_obj
         
         # Holds version info for the VersionId SOAP object.
-        self._version_info = {'service_id': 'trck', 'major': '5', 
+        self._version_info = {'service_id': 'trck', 'major': '8', 
                              'intermediate': '0', 'minor': '0'}
-        self.TrackPackageIdentifier = None
+
+        self.TrackSelectionDetail = None
         """@ivar: Holds the TrackPackageIdentifier WSDL object."""
         
         self.TrackingNumberUniqueIdentifier = kwargs.pop('tracking_number_unique_id', None)
-        
-        """@ivar: Holds the TrackingNumberUniqueIdentifier WSDL object."""
+        """@ivar: sets the TrackingNumberUniqueIdentifier WSDL object."""
+
         # Call the parent FedexBaseService class for basic setup work.
         super(FedexTrackRequest, self).__init__(self._config_obj, 
-                                                'TrackService_v5.wsdl',
+                                                'TrackService_v8.wsdl',
                                                 *args, **kwargs)
-        self.IncludeDetailedScans = False
         
     def _prepare_wsdl_objects(self):
         """
         This sets the package identifier information. This may be a tracking
         number or a few different things as per the Fedex spec.
         """
-        self.TrackPackageIdentifier = self.client.factory.create('TrackPackageIdentifier')
-        # Default to tracking number.
-        self.TrackPackageIdentifier.Type = 'TRACKING_NUMBER_OR_DOORTAG'
+        self.TrackSelectionDetail = self.client.factory.create('TrackSelectionDetail')
+
+        self.TrackSelectionDetail.PackageIdentifier.Type = 'TRACKING_NUMBER_OR_DOORTAG'
+
+        self.TrackSelectionDetail.CarrierCode = None
+
+        self.TrackSelectionDetail.OperatingCompany = None
+
+        self.TransactionDetail = self.client.factory.create('TransactionDetail')
+
+        self.TransactionDetail.CustomerTransactionId = '*** Track Request v8 ***'
+
+        self.ClientDetail.Localization.LanguageCode = 'en'
+
+        self.ClientDetail.Localization.LocaleCode = 'us'
+
+        self.ProcessingOptions = None
         
     def _check_response_for_request_errors(self):
         """
@@ -88,8 +102,7 @@ class FedexTrackRequest(FedexBaseService):
                                         ClientDetail=self.ClientDetail,
                                         TransactionDetail=self.TransactionDetail,
                                         Version=self.VersionId,
-                                        IncludeDetailedScans=self.IncludeDetailedScans,
-                                        PackageIdentifier=self.TrackPackageIdentifier,
-                                        TrackingNumberUniqueIdentifier = self.TrackingNumberUniqueIdentifier)
+                                        SelectionDetails=self.TrackSelectionDetail,
+                                        ProcessingOptions=self.ProcessingOptions)
 
         return response

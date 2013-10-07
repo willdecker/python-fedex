@@ -25,14 +25,14 @@ class FedexRateServiceRequest(FedexBaseService):
         self._config_obj = config_obj
         
         # Holds version info for the VersionId SOAP object.
-        self._version_info = {'service_id': 'crs', 'major': '8', 
+        self._version_info = {'service_id': 'crs', 'major': '14', 
                              'intermediate': '0', 'minor': '0'}
         
         self.RequestedShipment = None
         """@ivar: Holds the RequestedShipment WSDL object."""
         # Call the parent FedexBaseService class for basic setup work.
         super(FedexRateServiceRequest, self).__init__(self._config_obj, 
-                                                         'RateService_v8.wsdl',
+                                                         'RateService_v14.wsdl',
                                                          *args, **kwargs)
         self.ClientDetail.Region = config_obj.express_region_code
         
@@ -49,14 +49,15 @@ class FedexRateServiceRequest(FedexBaseService):
         self.RequestedShipment = self.client.factory.create('RequestedShipment')
         self.RequestedShipment.ShipTimestamp = datetime.now()
         
-        TotalWeight = self.client.factory.create('Weight')
+        # for multiple packages...
+#        TotalWeight = self.client.factory.create('Weight')
         # Start at nothing.
-        TotalWeight.Value = 0.0
+#        TotalWeight.Value = 0.0
         # Default to pounds.
-        TotalWeight.Units = 'LB'
+#        TotalWeight.Units = 'LB'
         # This is the total weight of the entire shipment. Shipments may
         # contain more than one package.
-        self.RequestedShipment.TotalWeight = TotalWeight
+#        self.RequestedShipment.TotalWeight = TotalWeight
             
         # This is the top level data structure for Shipper information.
         ShipperParty = self.client.factory.create('Party')
@@ -74,16 +75,16 @@ class FedexRateServiceRequest(FedexBaseService):
         # Link the RecipientParty object to our master data structure.
         self.RequestedShipment.Recipient = RecipientParty
                 
-        Payor = self.client.factory.create('Payor')
+#        Payor = self.client.factory.create('Payor')
         # Grab the account number from the FedexConfig object by default.
-        Payor.AccountNumber = self._config_obj.account_number
+#        Payor.AccountNumber = self._config_obj.account_number
         # Assume US.
-        Payor.CountryCode = 'US'
+#        Payor.CountryCode = 'US'
         
-        ShippingChargesPayment = self.client.factory.create('Payment')
-        ShippingChargesPayment.Payor = Payor
+#        ShippingChargesPayment = self.client.factory.create('Payment')
+#        ShippingChargesPayment.Payor = Payor
 
-        self.RequestedShipment.ShippingChargesPayment = ShippingChargesPayment
+#        self.RequestedShipment.ShippingChargesPayment = ShippingChargesPayment
         
         # ACCOUNT or LIST
         self.RequestedShipment.RateRequestTypes = ['ACCOUNT'] 
@@ -128,6 +129,6 @@ class FedexRateServiceRequest(FedexBaseService):
         """
         self.RequestedShipment.RequestedPackageLineItems.append(package_item)
         package_weight = package_item.Weight.Value
-        self.RequestedShipment.TotalWeight.Value += package_weight
+#        self.RequestedShipment.TotalWeight.Value += package_weight
         self.RequestedShipment.PackageCount += 1
         
