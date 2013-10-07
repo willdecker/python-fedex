@@ -1,3 +1,6 @@
+Modifications are made available on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
 Python FedEx SOAP API Module
 ============================
 
